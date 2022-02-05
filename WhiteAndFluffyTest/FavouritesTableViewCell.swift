@@ -54,8 +54,8 @@ final class FavouritesTableViewCell: UITableViewCell {
             smallImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -6),
             smallImageView.widthAnchor.constraint(lessThanOrEqualToConstant: 100),
             
-            smallAuthorLabel.topAnchor.constraint(equalTo: smallImageView.topAnchor),
-            smallAuthorLabel.bottomAnchor.constraint(equalTo: smallImageView.bottomAnchor),
+            smallAuthorLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 6),
+            smallAuthorLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -6),
             smallAuthorLabel.leadingAnchor.constraint(equalTo: smallImageView.trailingAnchor, constant: 14),
             smallAuthorLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -6)
         ])
