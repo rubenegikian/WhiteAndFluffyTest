@@ -36,7 +36,8 @@ final class NetworkDataFetcher {
         }
     }
     
-    func fetchDetailedImage(id: String, completion: @escaping (DetailedImage?) -> Void) {
+    func fetchDetailedImage(id: String?, completion: @escaping (DetailedImage?) -> Void) {
+        guard let id = id else { return }
         networkService.getInfoOfImage(id: id) { (data, error) in
             if let error = error {
                 print("Error: \(error.localizedDescription)")

@@ -47,18 +47,18 @@ extension FavouritesViewController {
 
 extension FavouritesViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        favourites.count
+        FavouriteImages.favourites.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: FavouritesTableViewCell.reuseId, for: indexPath) as? FavouritesTableViewCell else { return .init() }
-        let favouriteImage = favourites[indexPath.row]
+        let favouriteImage = FavouriteImages.favourites[indexPath.row]
         cell.favouriteImage = favouriteImage
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let detailedImage = favourites[indexPath.row]
+        let detailedImage = FavouriteImages.favourites[indexPath.row]
         let infoVC = ImageInfoViewController()
         infoVC.detailedImage = detailedImage
         infoVC.delegate = self
@@ -75,7 +75,7 @@ extension FavouritesViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         tableView.beginUpdates()
-        favourites.remove(at: indexPath.row)
+        FavouriteImages.favourites.remove(at: indexPath.row)
         tableView.deleteRows(at: [indexPath], with: .fade)
         tableView.endUpdates()
     }

@@ -10,7 +10,7 @@ import Foundation
 protocol NetworkService {
     func getRandomImages(completion: @escaping (Data?, Error?) -> Void)
     func getSearchImages(searchText: String, completion: @escaping (Data?, Error?) -> Void)
-    func getInfoOfImage(id: String, completion: @escaping (Data?, Error?) -> Void)
+    func getInfoOfImage(id: String?, completion: @escaping (Data?, Error?) -> Void)
 }
 
 final class NetworkServiceImplementation: NetworkService {
@@ -35,7 +35,8 @@ final class NetworkServiceImplementation: NetworkService {
         task.resume()
     }
     
-    func getInfoOfImage(id: String, completion: @escaping (Data?, Error?) -> Void) {
+    func getInfoOfImage(id: String?, completion: @escaping (Data?, Error?) -> Void) {
+        guard let id = id else { return }
         let url = infoUrl(id: id)
         var request = URLRequest(url: url)
         request.allHTTPHeaderFields = setupHeader()

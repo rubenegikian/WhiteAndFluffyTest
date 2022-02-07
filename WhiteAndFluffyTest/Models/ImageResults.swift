@@ -83,4 +83,6 @@ struct Location: Codable {
     var country: String
 }
 
-var favourites = [DetailedImage]()
+struct FavouriteImages {
+    static var favourites = [DetailedImage]()
+}

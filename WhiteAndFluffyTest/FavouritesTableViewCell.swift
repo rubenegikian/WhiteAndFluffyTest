@@ -49,13 +49,13 @@ final class FavouritesTableViewCell: UITableViewCell {
         addSubview(smallAuthorLabel)
         
         NSLayoutConstraint.activate([
-            smallImageView.topAnchor.constraint(equalTo: self.topAnchor, constant: 6),
             smallImageView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 6),
-            smallImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -6),
+            smallImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             smallImageView.widthAnchor.constraint(lessThanOrEqualToConstant: 100),
+            smallImageView.heightAnchor.constraint(equalToConstant: 38),
             
-            smallAuthorLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 6),
-            smallAuthorLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -6),
+            smallAuthorLabel.heightAnchor.constraint(equalToConstant: 38),
+            smallAuthorLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             smallAuthorLabel.leadingAnchor.constraint(equalTo: smallImageView.trailingAnchor, constant: 14),
             smallAuthorLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -6)
         ])

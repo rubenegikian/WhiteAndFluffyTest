@@ -116,14 +116,9 @@ extension ImagesViewController: UICollectionViewDataSource, UICollectionViewDele
         guard let image = images[indexPath.row] as? SingleImage else { return }
         let id = image.id
         let infoVC = ImageInfoViewController()
-        networkDataFetcher.fetchDetailedImage(id: id) { [weak self] (detailedImage) in
-            guard let self = self else { return }
-            guard let fetchedImage = detailedImage else { return }
-            DispatchQueue.main.async {
-                infoVC.detailedImage = fetchedImage
-                self.present(infoVC, animated: true)
-            }
-        }
+        infoVC.networkDataFetcher = networkDataFetcher
+        infoVC.id = id
+        present(infoVC, animated: true)
     }
 }
 

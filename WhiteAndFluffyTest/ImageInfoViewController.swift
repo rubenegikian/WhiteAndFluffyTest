@@ -16,21 +16,15 @@ protocol ImageInfoDelegate: AnyObject {
 final class ImageInfoViewController: UIViewController {
     weak var delegate: ImageInfoDelegate?
     
-    var detailedImage: DetailedImage! {
+    var networkDataFetcher: NetworkDataFetcher?
+    var id: String? {
         didSet {
-            let imageUrl = detailedImage.urls["regular"]
-            guard let imageUrl = imageUrl, let url = URL(string: imageUrl) else { return }
-            imageView.sd_setImage(with: url, completed: nil)
-            authorLabel.text = detailedImage.user.name
-            locationLabel.text = "\(detailedImage.location?.city ?? "Unknown city"), \(detailedImage.location?.country ?? "Unknown country")"
-            downloadsLabel.text = "Downloads: \(detailedImage.downloads)"
-            setupDate(date: detailedImage.createdAt)
-            for image in favourites {
-                if image.id == detailedImage.id {
-                    isFavourite = true
-                    buttonChange(isFavourite: isFavourite)
-                }
-            }
+            getImage()
+        }
+    }
+    var detailedImage: DetailedImage? {
+        didSet {
+            updateUI()
         }
     }
     
@@ -47,6 +41,7 @@ final class ImageInfoViewController: UIViewController {
     private lazy var locationSignImageView: UIImageView = {
         let image = UIImage(systemName: "mappin.and.ellipse")
         let imageView = UIImageView(image: image)
+        imageView.isHidden = true
         imageView.tintColor = .systemGray2
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -87,6 +82,7 @@ final class ImageInfoViewController: UIViewController {
     
     private lazy var addToFavouritesButton: UIButton = {
         let button = UIButton()
+        button.isEnabled = false
         button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 12
@@ -163,9 +159,37 @@ final class ImageInfoViewController: UIViewController {
             addToFavouritesButton.heightAnchor.constraint(equalToConstant: 40),
             addToFavouritesButton.widthAnchor.constraint(equalToConstant: 200)
         ])
-        
     }
-
+    
+    private func getImage() {
+        networkDataFetcher?.fetchDetailedImage(id: id) { [weak self] (detailedImage) in
+            guard let self = self else { return }
+            guard let fetchedImage = detailedImage else { return }
+            DispatchQueue.main.async {
+                self.detailedImage = fetchedImage
+                self.updateUI()
+            }
+        }
+    }
+    
+    private func updateUI() {
+        guard let detailedImage = detailedImage else { return }
+        let imageUrl = detailedImage.urls["regular"]
+        guard let imageUrl = imageUrl, let url = URL(string: imageUrl) else { return }
+        addToFavouritesButton.isEnabled = true
+        locationSignImageView.isHidden = false
+        imageView.sd_setImage(with: url, completed: nil)
+        authorLabel.text = detailedImage.user.name
+        locationLabel.text = "\(detailedImage.location?.city ?? "Unknown city"), \(detailedImage.location?.country ?? "Unknown country")"
+        downloadsLabel.text = "Downloads: \(detailedImage.downloads)"
+        setupDate(date: detailedImage.createdAt)
+        for image in FavouriteImages.favourites {
+            if image.id == detailedImage.id {
+                isFavourite = true
+                buttonChange(isFavourite: isFavourite)
+            }
+        }
+    }
 }
 
 // MARK: Selectors
@@ -179,9 +203,9 @@ extension ImageInfoViewController {
                 self.isFavourite = false
                 self.addToFavouritesButton.setTitle("Add to favourites", for: .normal)
                 self.addToFavouritesButton.backgroundColor = .systemIndigo
-                for index in 0..<favourites.count {
-                    if favourites[index].id == self.detailedImage.id {
-                        favourites.remove(at: index)
+                for index in 0..<FavouriteImages.favourites.count {
+                    if FavouriteImages.favourites[index].id == self.detailedImage!.id {
+                        FavouriteImages.favourites.remove(at: index)
                         self.delegate?.didChangeFavouritesList()
                         break
                     }
@@ -195,7 +219,7 @@ extension ImageInfoViewController {
             isFavourite = true
             addToFavouritesButton.setTitle("Remove from favourites", for: .normal)
             addToFavouritesButton.backgroundColor = .red
-            favourites.append(detailedImage)
+            FavouriteImages.favourites.append(detailedImage!)
             self.delegate?.didChangeFavouritesList()
         }
     }
