@@ -15,6 +15,7 @@ final class ImagesViewController: UIViewController {
     private var randomImages = [Image]()
     private let itemsPerRow: CGFloat = 2
     private let sectionInserts = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+    private var searchBarIsEmpty = true
     
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -23,6 +24,7 @@ final class ImagesViewController: UIViewController {
         collection.translatesAutoresizingMaskIntoConstraints = false
         collection.delegate = self
         collection.dataSource = self
+        collection.prefetchDataSource = self
         collection.register(ImageCollectionViewCell.self, forCellWithReuseIdentifier: ImageCollectionViewCell.reuseId)
         return collection
     }()
@@ -122,6 +124,28 @@ extension ImagesViewController: UICollectionViewDataSource, UICollectionViewDele
     }
 }
 
+// MARK: Prefetching DataSource
+
+extension ImagesViewController: UICollectionViewDataSourcePrefetching {
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        if searchBarIsEmpty {
+            for index in indexPaths {
+                if index.row == images.count - 1 {
+                    self.networkDataFetcher.fetchRandomImages { [weak self] (randomSingleImages) in
+                        guard let self = self else { return }
+                        guard let fetchedImages = randomSingleImages else { return }
+                        DispatchQueue.main.async {
+                            self.randomImages += fetchedImages
+                            self.images = self.randomImages
+                            self.collectionView.reloadData()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 // MARK: - SeachBarDelegate
 
 extension ImagesViewController: UISearchBarDelegate {
@@ -129,6 +153,7 @@ extension ImagesViewController: UISearchBarDelegate {
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false, block: { (_) in
             if searchText.count == 0 || searchText == " " {
                 DispatchQueue.main.async {
+                    self.searchBarIsEmpty = true
                     self.images = self.randomImages
                     self.collectionView.reloadData()
                 }
@@ -137,11 +162,19 @@ extension ImagesViewController: UISearchBarDelegate {
                     guard let self = self else { return }
                     guard let fetchedImages = searchResults else { return }
                     DispatchQueue.main.async {
+                        self.searchBarIsEmpty = false
                         self.images = fetchedImages.results
                         self.collectionView.reloadData()
                     }
                 }
             }
         })
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        searchBarIsEmpty = true
+        images = randomImages
+        collectionView.reloadData()
     }
 }
